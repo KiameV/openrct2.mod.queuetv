@@ -1,9 +1,15 @@
+const name = "Queue TV Placer";
+const dbcUID="qtvplacer.daysbetween";
+const defaultDaysBetweenChecks = 6;
+var daysBetweenChecks = 6;
 function main() {
 	var qtv;
 	var counter = 0;
+	loadSettings();
+	registerQTVSettings();
 	context.subscribe("interval.day", function (ev) {
 		counter++;
-		if (counter < 6) {
+		if (counter < daysBetweenChecks || daysBetweenChecks == 0) {
 			return;
 		}
 		counter = 0;
@@ -41,7 +47,7 @@ function main() {
 }
 
 registerPlugin({
-    name: 'TV Queues',
+    name: '"Queue TV Placer"',
     version: '1.0',
     authors: ['KiameV'],
     type: 'local',
@@ -49,3 +55,46 @@ registerPlugin({
     targetApiVersion: 44,
     main: main
 });
+
+function loadSettings() {
+	daysBetweenChecks = context.sharedStorage.get(dbcUID, defaultDaysBetweenChecks);
+}
+
+function registerQTVSettings() {
+		ui.registerMenuItem(name, function () {
+		var window = ui.openWindow({
+			title: name,
+			id: 1,
+			classification: name,
+			width: 300,
+			height: 50,
+			widgets: [
+			{
+				type: 'label',
+				name: 'Days Between Checks Label',
+				text: 'Days Between checks',
+				x: 5,
+				y: 25,
+				width: 150,
+				height: 25,
+			},
+			{
+				type: 'textbox',
+				name: 'Days Between Checks',
+				text: ''+daysBetweenChecks,
+				x: 160,
+				y: 20,
+				width: 30,
+				height: 25,
+				onChange: function(i) {
+					var n = parseInt(i);
+					if (i >= 0) {
+						daysBetweenChecks = n;
+						context.sharedStorage.set(dbcUID, daysBetweenChecks);
+					}
+				},
+			},
+			]
+		});
+	});
+}
