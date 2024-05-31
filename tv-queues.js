@@ -3,8 +3,9 @@ const dbcUID="qtvplacer.daysbetween";
 const defaultDaysBetweenChecks = 6;
 var daysBetweenChecks = 6;
 function main() {
-	var qtv;
 	var counter = 0;
+	var qtv = null;
+	//console.log("[Queue TV Placer] starting with api verison: " + context.apiVersion);
 	loadSettings();
 	registerQTVSettings();
 	context.subscribe("interval.day", function (ev) {
@@ -16,13 +17,16 @@ function main() {
 		if (context.mode !== "normal") {
 			return;
 		}
-		var qtv;
-		context.getAllObjects("footpath_addition").forEach(function (a) {
-			if (a.identifier.toLowerCase().includes("qt")) {
-				qtv = a;
-			}
-		});
 		if (!qtv) {
+			objectManager.getAllObjects("footpath_addition").forEach(function (i) {
+				if (i.identifier == ("rct2.footpath_item.qtv1")) {
+					//console.log("[Queue TV Placer] qtv found!")
+					qtv = i;
+				}
+			});
+		}
+		if (!qtv) {
+			//console.log("[Queue TV Placer] qtv not found!")
 			return;
 		}
 		for (var x = 0; x < map.size.x; x++) {
@@ -36,23 +40,27 @@ function main() {
 								x: x * 32,
 								y: y * 32,
 								z: e.baseZ,
-								object: qtv.index + 1
+								object: qtv.index
 							});
 						}
 					}
 				});
 			}
 		}
+		context.subscribe("map.change", function (ev) {
+			//console.log("[Queue TV Placer] map change");
+			qtv = null;
+		})
 	});
 }
 
 registerPlugin({
     name: '"Queue TV Placer"',
-    version: '1.0',
+    version: '1.1',
     authors: ['KiameV'],
     type: 'local',
     licence: 'MIT',
-    targetApiVersion: 44,
+    targetApiVersion: 85,
     main: main
 });
 
@@ -66,7 +74,7 @@ function registerQTVSettings() {
 			title: name,
 			id: 1,
 			classification: name,
-			width: 200,
+			width: 250,
 			height: 50,
 			widgets: [
 			{
@@ -84,7 +92,7 @@ function registerQTVSettings() {
 				text: ''+daysBetweenChecks,
 				x: 150,
 				y: 20,
-				width: 30,
+				width: 80,
 				height: 25,
 				onChange: function(i) {
 					var n = parseInt(i);
