@@ -47,10 +47,6 @@ function main() {
 				});
 			}
 		}
-		context.subscribe("map.change", function (ev) {
-			//console.log("[Queue TV Placer] map change");
-			qtv = null;
-		})
 	});
 }
 
